@@ -1,0 +1,181 @@
+#!/usr/bin/python
+
+from lxml import etree
+import ogr
+from shapely.geometry import Polygon, Point, LineString
+from shapely.geometry.polygon import LinearRing
+from shapely.wkt import loads
+from config import layer_conf
+
+
+class OepsPoint(Point):
+ 
+    def xml(self):
+        point_element = etree.Element(u"punt")
+        x_element = etree.Element("x")
+        x_element.text = unicode(self.x)
+        y_element = etree.Element("y")
+        y_element.text = unicode(self.y)
+        point_element.append(x_element)
+        point_element.append(y_element)
+        return point_element
+
+
+class OepsLinearRing(LinearRing):
+
+    def __init__(self, *args, **kwargs):
+        super(OepsLinearRing, self).__init__(*args)
+        self.ring_type = unicode(kwargs['ring_type'])
+
+    def xml(self):
+        lr_element = etree.Element(u'ring', type=self.ring_type)
+        for coord in self.coords:
+            lr_element.append(OepsPoint(coord).xml())
+        return lr_element
+
+
+class Adrespunt(object):
+    
+    def __init__(self, adres_id, point):
+        self.adres_id = adres_id
+        self.point = point
+
+    def xml(self):
+        adrespunt_element = etree.Element(u'adrespunt')
+        id_element = etree.Element(u'id')
+        id_element.text = unicode(self.adres_id)
+        adrespunt_element.append(id_element)
+        adrespunt_element.append(self.point.xml())
+        return adrespunt_element
+
+
+class Polygoon(object):
+
+    def __init__(self, rings):
+        self.rings = rings
+
+    def xml(self):
+        polygoon_element = etree.Element(u'polygoon')
+        for ring in self.rings:
+            polygoon_element.append(ring.xml()) 
+        return polygoon_element
+
+           
+class OepsFeature(object):
+
+    def __init__(self, feature_id, feature_type, constituents):
+        self.feature_id = feature_id
+        self.feature_type = feature_type
+        self.constituents = constituents
+
+    def xml(self):
+        feature_element = etree.Element(unicode(self.feature_type))
+        id_element = etree.Element(u'id')
+        id_element.text = unicode(self.feature_id)
+        feature_element.append(id_element)
+        for constituent in self.constituents:
+            feature_element.append(constituent.xml())
+        return feature_element
+
+
+class GisLocaties(object):
+    def __init__(self):
+        pass
+
+    def xml(self):
+        gis_locaties_element = etree.Element(u'gis_locaties')
+        return gis_locaties_element
+class Exporter(object):
+
+    def __init__(self):
+        self.root = GisLocaties().xml() 
+ 
+    def export_layer(self, layer):
+        shapefile = layer.path
+        datasource = ogr.Open(shapefile)
+
+        if datasource is None:
+            raise Exception('Failed to open %s' % (shapefile))
+        
+        lyr = datasource.GetLayerByName(layer.basename)
+        lyr_defn = lyr.GetLayerDefn()
+        feature_type = lyr_defn.GetGeomType()
+        
+        if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') == -1:
+           self.__point_export(lyr, layer) 
+
+        if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') > -1:
+           self.__adres_export(lyr, layer, datasource)
+
+        if feature_type == 3:
+           self.__polygon_export(lyr, layer)
+            
+    def __point_export(self, lyr,layer):
+        for i in range(lyr.GetFeatureCount()): 
+            f = lyr.GetNextFeature()
+            g = f.GetGeometryRef()
+            print g
+            identifier = f.GetFieldAsString(layer.id_field)
+
+            oe_point = OepsPoint(g.GetX(), g.GetY())
+            oe_feature = OepsFeature(identifier, layer.name, [oe_point])
+            self.root.append(oe_feature.xml())
+    
+    def __adres_export(self, lyr, layer, ds):
+        sql = 'SELECT DISTINCT %s FROM %s' % (layer.id_field, layer.basename)
+        id_lyr = ds.ExecuteSQL(sql)
+        for i in range(id_lyr.GetFeatureCount()):
+            feature = id_lyr.GetNextFeature()
+            identifier = feature.GetFieldAsString(layer.id_field)
+            sql = 'SELECT * FROM %s WHERE %s = %s' % (layer.basename,
+                                                      layer.id_field,
+                                                      int(identifier))
+            rs = ds.ExecuteSQL(sql)
+            adrespunten = []
+            for i in range(rs.GetFeatureCount()):
+                f = rs.GetNextFeature()
+                g = f.GetGeometryRef()
+                adres = Adrespunt(
+                          f.GetFieldAsString(2), 
+                          OepsPoint(g.GetX(), g.GetY()))
+                adrespunten.append(adres)
+            oe_feature = OepsFeature(identifier, layer.name, adrespunten)
+            self.root.append(oe_feature.xml())
+            ds.ReleaseResultSet(rs)
+        ds.ReleaseResultSet(id_lyr)
+
+    def __polygon_export(self, lyr, layer):
+
+        def ring_export(ring, r_type):
+            lin_ring_wkt = ring.ExportToWkt()
+            lin_ring = loads(lin_ring_wkt) .wkt
+            oe_ring = OepsLinearRing(lin_ring.coords, ring_type=r_type)
+            return oe_ring
+    
+        for i in range(lyr.GetFeatureCount()):
+            f = lyr.GetNextFeature()
+            geometry = f.GetGeometryRef()
+            multi_poly = ogr.ForceToMultiPolygon(geometry)
+            rings = []
+            for j in range(multi_poly.GetGeometryCount()):
+                poly = multi_poly.GetGeometryRef(j)
+                for k in range(poly.GetGeometryCount()):
+                    ring = poly.GetGeometryRef(k)
+                    ring_type = 'exterior' if k == 0 else 'interior'
+                    rings.append(ring_export(ring, ring_type)) 
+            polygoon = Polygoon(rings)
+            self.root.append(polygoon.xml())
+         
+
+    def serialize(self):
+        return etree.tostring(self.root)
+
+if __name__=="__main__":
+    p = OepsPoint((13,4))
+    p2 = OepsPoint((12,3))
+    lr = OepsLinearRing([(12,3), (14,2), (11,1)], ring_type='outer')
+    lr2 = OepsLinearRing([(12.1, 3.1), (14, 2), (11, 1)], ring_type='inner')
+    adres = Adrespunt(1, p)
+    poly = Polygoon([lr, lr2])
+    feat = OepsFeature(1, 'dibe_geheel', [poly])
+    print etree.tostring(feat.xml())
