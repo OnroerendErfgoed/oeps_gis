@@ -1,3 +1,5 @@
+import os
+from datetime import datetime
 from conf.conf import Layer, LayerConfig
 
 layer_conf = LayerConfig()
@@ -13,3 +15,6 @@ layer_conf.add_layer(Layer('ivm_varend', 'edit_ivm_varend.shp', 'Id'))
 layer_conf.add_layer(Layer('woi_relict', 'edit_woi_relict.shp', 'ID'))
 layer_conf.add_layer(Layer('deo_gebeurtenis', 'edit_deo_gebeurtenis.shp','Id'))
 layer_conf.add_layer(Layer('bes_bescherming', 'edit_bes_bescherming.shp','Id'))
+
+output_filename = os.path.join(os.path.expanduser('~'), 'oeps_export_' + 
+                        (datetime.now().isoformat()).replace(':','-') + '.xml') 

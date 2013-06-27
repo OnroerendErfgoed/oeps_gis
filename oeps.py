@@ -33,7 +33,7 @@ class OepsLinearRing(LinearRing):
         return lr_element
 
 
-class Adrespunt(object):
+class OepsAdrespunt(object):
     
     def __init__(self, adres_id, point):
         self.adres_id = adres_id
@@ -48,7 +48,7 @@ class Adrespunt(object):
         return adrespunt_element
 
 
-class Polygoon(object):
+class OepsPolygoon(object):
 
     def __init__(self, rings):
         self.rings = rings
@@ -88,25 +88,25 @@ class GisLocaties(object):
 
 class Exporter(object):
 
-    def __init__(self):
+    def __init__(self, output_filename):
         self.root = GisLocaties().xml() 
+        self.file_name = output_filename
  
-    def export_layer(self, layer):
-        shapefile = layer.path
-        datasource = ogr.Open(shapefile)
+    def append_xml(self, layer):
+        datasource = ogr.Open(layer.path)
         if datasource is None:
-            raise Exception('Failed to open %s' % (shapefile))
+            raise Exception('Failed to open %s' % (layer.path))
         lyr = datasource.GetLayerByName(layer.basename)
         lyr_defn = lyr.GetLayerDefn()
         feature_type = lyr_defn.GetGeomType()
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') == -1:
-           self.__point_export(lyr, layer) 
+           self.__append_point_xml(lyr, layer) 
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') > -1:
-           self.__adres_export(lyr, layer, datasource)
+           self.__append_adres_xml(lyr, layer, datasource)
         if feature_type == 3:
-           self.__polygon_export(lyr, layer)
+           self.__append_polygon_xml(lyr, layer)
             
-    def __point_export(self, lyr,layer):
+    def __append_point_xml(self, lyr,layer):
         for i in range(lyr.GetFeatureCount()): 
             feature = lyr.GetNextFeature()
             geometry = feature.GetGeometryRef()
@@ -115,7 +115,7 @@ class Exporter(object):
             oe_feature = OepsFeature(identifier, layer.name, [oe_point])
             self.root.append(oe_feature.xml())
     
-    def __adres_export(self, lyr, layer, ds):
+    def __append_adres_xml(self, lyr, layer, ds):
         sql = 'SELECT DISTINCT %s FROM %s' % (layer.id_field, layer.basename)
         id_lyr = ds.ExecuteSQL(sql)
         for i in range(id_lyr.GetFeatureCount()):
@@ -123,13 +123,13 @@ class Exporter(object):
             identifier = feature.GetFieldAsString(layer.id_field)
             sql = 'SELECT * FROM %s WHERE %s = %s' % (layer.basename,
                                                       layer.id_field,
-                                                      int(identifier))
+                                                      identifier)
             rs = ds.ExecuteSQL(sql)
             adrespunten = []
             for i in range(rs.GetFeatureCount()):
                 feature = rs.GetNextFeature()
                 geometry = feature.GetGeometryRef()
-                adres = Adrespunt(
+                adres = OepsAdrespunt(
                           feature.GetFieldAsString(2), 
                           OepsPoint(geometry.GetX(), geometry.GetY()))
                 adrespunten.append(adres)
@@ -138,11 +138,10 @@ class Exporter(object):
             ds.ReleaseResultSet(rs)
         ds.ReleaseResultSet(id_lyr)
 
-    def __polygon_export(self, lyr, layer):
+    def __append_polygon_xml(self, lyr, layer):
 
         def ring_export(ring, r_type):
-            lin_ring_wkt = ring.ExportToWkt()
-            lin_ring = loads(lin_ring_wkt)
+            lin_ring = loads(ring.ExportToWkt())
             oe_ring = OepsLinearRing(lin_ring.coords, ring_type=r_type)
             return oe_ring
     
@@ -158,9 +157,19 @@ class Exporter(object):
                     ring = poly.GetGeometryRef(k)
                     ring_type = 'outer' if k == 0 else 'inner'
                     rings.append(ring_export(ring, ring_type)) 
-            polygoon = Polygoon(rings)
+            polygoon = OepsPolygoon(rings)
             oe_feature = OepsFeature(identifier, layer.name, [polygoon]) 
             self.root.append(oe_feature.xml())
 
-    def serialize(self):
-        return etree.tostring(self.root)
+    def serialize(self, pretty=False):
+        return etree.tostring(self.root, pretty_print=pretty)
+
+    def export(self, pretty=False):
+        doctree = etree.ElementTree(self.root)
+        output_file = open(self.file_name, 'w')
+        doctree.write(output_file, 
+                      encoding="UTF-8", 
+                      method="xml", 
+                      pretty_print=pretty,
+                      xml_declaration=True)
+        output_file.close()

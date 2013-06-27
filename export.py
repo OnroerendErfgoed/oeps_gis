@@ -1,9 +1,10 @@
 import os
 from lxml import etree
 from oeps import Exporter
-from config import layer_conf
+from config import layer_conf, output_filename
 
-exporter = Exporter()
+exporter = Exporter(output_filename)
 for layername, layer in layer_conf.register.iteritems():
-    exporter.export_layer(layer)
-print exporter.serialize()
+    exporter.append_xml(layer)
+
+exporter.export(pretty=True)
