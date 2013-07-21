@@ -1,5 +1,6 @@
-import os
-from lxml import etree
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from oeps import Exporter
 from config import layer_conf, output_filename
 

@@ -1,14 +1,14 @@
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from lxml import etree
 import ogr
-from shapely.geometry import Polygon, Point, LineString
+from shapely.geometry import Point
 from shapely.geometry.polygon import LinearRing
 from shapely.wkt import loads
 
 
 class OepsPoint(Point):
- 
+
     def xml(self):
         point_element = etree.Element(u"punt")
         x_element = etree.Element("x")
@@ -34,7 +34,7 @@ class OepsLinearRing(LinearRing):
 
 
 class OepsAdrespunt(object):
-    
+
     def __init__(self, adres_id, point):
         self.adres_id = adres_id
         self.point = point
@@ -56,10 +56,10 @@ class OepsPolygoon(object):
     def xml(self):
         polygoon_element = etree.Element(u'polygoon')
         for ring in self.rings:
-            polygoon_element.append(ring.xml()) 
+            polygoon_element.append(ring.xml())
         return polygoon_element
 
-           
+
 class OepsFeature(object):
 
     def __init__(self, feature_id, feature_type, constituents):
@@ -89,9 +89,9 @@ class GisLocaties(object):
 class Exporter(object):
 
     def __init__(self, output_filename):
-        self.root = GisLocaties().xml() 
+        self.root = GisLocaties().xml()
         self.file_name = output_filename
- 
+
     def append_xml(self, layer):
         datasource = ogr.Open(layer.path)
         if datasource is None:
@@ -100,21 +100,21 @@ class Exporter(object):
         lyr_defn = lyr.GetLayerDefn()
         feature_type = lyr_defn.GetGeomType()
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') == -1:
-           self.__append_point_xml(lyr, layer) 
+            self.__append_point_xml(lyr, layer)
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') > -1:
-           self.__append_adres_xml(lyr, layer, datasource)
+            self._append_adres_xml(lyr, layer, datasource)
         if feature_type == 3:
-           self.__append_polygon_xml(lyr, layer)
-            
-    def __append_point_xml(self, lyr,layer):
-        for i in range(lyr.GetFeatureCount()): 
+            self.__append_polygon_xml(lyr, layer)
+
+    def __append_point_xml(self, lyr, layer):
+        for i in range(lyr.GetFeatureCount()):
             feature = lyr.GetNextFeature()
             geometry = feature.GetGeometryRef()
             identifier = feature.GetFieldAsString(layer.id_field)
             oe_point = OepsPoint(geometry.GetX(), geometry.GetY())
             oe_feature = OepsFeature(identifier, layer.name, [oe_point])
             self.root.append(oe_feature.xml())
-    
+
     def __append_adres_xml(self, lyr, layer, ds):
         sql = 'SELECT DISTINCT %s FROM %s' % (layer.id_field, layer.basename)
         id_lyr = ds.ExecuteSQL(sql)
@@ -130,7 +130,7 @@ class Exporter(object):
                 feature = rs.GetNextFeature()
                 geometry = feature.GetGeometryRef()
                 adres = OepsAdrespunt(
-                          feature.GetFieldAsString(2), 
+                          feature.GetFieldAsString(2),
                           OepsPoint(geometry.GetX(), geometry.GetY()))
                 adrespunten.append(adres)
             oe_feature = OepsFeature(identifier, layer.name, adrespunten)
@@ -144,7 +144,7 @@ class Exporter(object):
             lin_ring = loads(ring.ExportToWkt())
             oe_ring = OepsLinearRing(lin_ring.coords, ring_type=r_type)
             return oe_ring
-    
+
         for i in range(lyr.GetFeatureCount()):
             feature = lyr.GetNextFeature()
             geometry = feature.GetGeometryRef()
@@ -156,9 +156,9 @@ class Exporter(object):
                 for k in range(poly.GetGeometryCount()):
                     ring = poly.GetGeometryRef(k)
                     ring_type = 'outer' if k == 0 else 'inner'
-                    rings.append(ring_export(ring, ring_type)) 
+                    rings.append(ring_export(ring, ring_type))
             polygoon = OepsPolygoon(rings)
-            oe_feature = OepsFeature(identifier, layer.name, [polygoon]) 
+            oe_feature = OepsFeature(identifier, layer.name, [polygoon])
             self.root.append(oe_feature.xml())
 
     def serialize(self, pretty=False):
@@ -167,9 +167,9 @@ class Exporter(object):
     def export(self, pretty=False):
         doctree = etree.ElementTree(self.root)
         output_file = open(self.file_name, 'w')
-        doctree.write(output_file, 
-                      encoding="UTF-8", 
-                      method="xml", 
+        doctree.write(output_file,
+                      encoding="UTF-8",
+                      method="xml",
                       pretty_print=pretty,
                       xml_declaration=True)
         output_file.close()
