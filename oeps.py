@@ -102,7 +102,7 @@ class Exporter(object):
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') == -1:
             self.__append_point_xml(lyr, layer)
         if feature_type == 1 and lyr_defn.GetFieldIndex('adres_id') > -1:
-            self._append_adres_xml(lyr, layer, datasource)
+            self.__append_adres_xml(lyr, layer, datasource)
         if feature_type == 3:
             self.__append_polygon_xml(lyr, layer)
 
