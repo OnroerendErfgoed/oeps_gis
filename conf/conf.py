@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
+
 
 class Layer(object):
 
@@ -13,7 +15,7 @@ class Layer(object):
     def path(self):
         return self._path
 
-    @path.getter 
+    @path.getter
     def path(self):
         return os.path.join(os.path.expanduser('~'), 'oeps_edit', self.filename)
 
@@ -25,10 +27,11 @@ class Layer(object):
     def basename(self):
         return os.path.splitext(self.filename)[0]
 
+
 class LayerConfig(object):
 
     def __init__(self):
         self.register = {}
 
-    def add_layer(self,layer):
+    def add_layer(self, layer):
         self.register[layer.name] = layer
