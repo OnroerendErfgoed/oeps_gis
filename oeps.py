@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lxml import etree
+import xml.etree.ElementTree as etree
 import ogr
 from shapely.geometry import Point
 from shapely.geometry.polygon import LinearRing
@@ -161,15 +161,14 @@ class Exporter(object):
             oe_feature = OepsFeature(identifier, layer.name, [polygoon])
             self.root.append(oe_feature.xml())
 
-    def serialize(self, pretty=False):
-        return etree.tostring(self.root, pretty_print=pretty)
+    def serialize(self):
+        return etree.tostring(self.root)
 
-    def export(self, pretty=False):
+    def export(self):
         doctree = etree.ElementTree(self.root)
         output_file = open(self.file_name, 'w')
         doctree.write(output_file,
                       encoding="UTF-8",
                       method="xml",
-                      pretty_print=pretty,
                       xml_declaration=True)
         output_file.close()
