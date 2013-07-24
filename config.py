@@ -22,7 +22,7 @@ output_filename = os.path.join(os.path.expanduser('~'), 'oeps_export_' +
                         (datetime.now().isoformat()).replace(':', '-') + '.xml')
 
 if os.path.splitdrive(output_filename)[0]:
-    output_filename = os.path.join('d:', 
+    output_filename = os.path.join('d:\\', 
                                    'gebruikersgegevens',
                                    os.path.split(os.path.expanduser('~'))[1],
                                    'oeps_export',
