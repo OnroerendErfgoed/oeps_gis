@@ -21,8 +21,7 @@ registry. Zie hiervoor: http://trac.osgeo.org/osgeo4w/ticket/114
 Installeren bij gebruiker
 -------------------------
 
-* Maak onde gebruikersgegevens/gebruiker een map oeps_export aan (zal later opgenomen worden in script)
+* kopieer de gebuilde applicatie naar de v-schijf
 * kopier de vioe_edit folder met de shapefiles naar de map gebruikersgegevens/gebruiker
-* kopier de gebuilde applicatie naar de d-schijf
 * maak eventueel een snelkoppeling naar dist/export.exe
 
