@@ -42,4 +42,6 @@ class LayerConfig(object):
         self.register = {}
 
     def add_layer(self, layer):
-        self.register[layer.name] = layer
+        if os.path.exists(layer.path):
+            self.register[layer.name] = layer
+        
