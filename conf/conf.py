@@ -17,7 +17,10 @@ class Layer(object):
 
     @path.getter
     def path(self):
-        return os.path.join(os.path.expanduser('~'), 'oeps_edit', self.filename)
+        shp = os.path.join(os.path.expanduser('~'), 'oeps_edit', self.filename)
+        if os.path.splitdrive(shp)[0]:                                                   
+           shp = os.path.join('d:', os.path.splitdrive(shp)[1])             
+        return shp
 
     @property
     def basename(self):
