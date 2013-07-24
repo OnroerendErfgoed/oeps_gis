@@ -6,6 +6,8 @@ Exporteren van gislocaties van shapefile naar oeps XML formaat
 Builden voor Windows
 --------------------
 
+_Opmerking: uitleen-laptop 2153598 is klaar reeds klaar om te builden_
+
 * Installeer dependencies (ogr, shapely). Dit is het eenvoudigst door de 
 osgeo4w-installer te gebruiken. registreer daarna de osgeo4w python in de
 registry. Zie hiervoor: http://trac.osgeo.org/osgeo4w/ticket/114
