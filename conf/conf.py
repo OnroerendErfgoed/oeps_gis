@@ -21,7 +21,7 @@ class Layer(object):
         if os.path.splitdrive(shp)[0]:                                                   
            shp = os.path.join('d:',           
                               'gebruikesgegevens',
-                              os.path.split(os.path.expanduser(~))[1],
+                              os.path.split(os.path.expanduser('~'))[1],
                               'oeps_edit',
                               os.path.split(shp)[1] 
                              )
