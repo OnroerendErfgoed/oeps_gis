@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import xml.etree.ElementTree as etree
 import ogr
 from shapely.geometry import Point
@@ -91,6 +92,9 @@ class Exporter(object):
     def __init__(self, output_filename):
         self.root = GisLocaties().xml()
         self.file_name = output_filename
+        base_name = os.path.split(self.file_name)[0]
+        if not os.path.isdir(base_name):
+            os.mkdir(base_name)
 
     def append_xml(self, layer):
         datasource = ogr.Open(layer.path)
