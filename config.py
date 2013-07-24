@@ -20,3 +20,11 @@ layer_conf.add_layer(Layer('bes_bescherming', 'edit_bes_bescherming.shp', 'Id'))
 
 output_filename = os.path.join(os.path.expanduser('~'), 'oeps_export_' +
                         (datetime.now().isoformat()).replace(':', '-') + '.xml')
+
+if os.path.splitdrive(output_filename)[0]:
+    output_filename = os.path.join('d:\\', 
+                                   'gebruikersgegevens',
+                                   os.path.split(os.path.expanduser('~'))[1],
+                                   'oeps_export',
+                                   os.path.split(output_filename)[1]
+                                  )
