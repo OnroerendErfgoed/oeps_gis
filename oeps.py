@@ -41,7 +41,7 @@ class OepsAdrespunt(object):
         self.point = point
 
     def xml(self):
-        adrespunt_element = etree.Element(u'adrespunt')
+        adrespunt_element = etree.Element(u'adres')
         id_element = etree.Element(u'id')
         id_element.text = unicode(self.adres_id)
         adrespunt_element.append(id_element)
@@ -154,15 +154,17 @@ class Exporter(object):
             geometry = feature.GetGeometryRef()
             multi_poly = ogr.ForceToMultiPolygon(geometry)
             identifier = feature.GetFieldAsString(layer.id_field)
-            rings = []
+            polygonen = []
             for j in range(multi_poly.GetGeometryCount()):
                 poly = multi_poly.GetGeometryRef(j)
+                rings=[]
                 for k in range(poly.GetGeometryCount()):
                     ring = poly.GetGeometryRef(k)
                     ring_type = 'outer' if k == 0 else 'inner'
                     rings.append(ring_export(ring, ring_type))
-            polygoon = OepsPolygoon(rings)
-            oe_feature = OepsFeature(identifier, layer.name, [polygoon])
+                polygoon = OepsPolygoon(rings)
+                polygonen.append(polygoon)
+            oe_feature = OepsFeature(identifier, layer.name, polygonen)
             self.root.append(oe_feature.xml())
 
     def serialize(self):
