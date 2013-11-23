@@ -16,32 +16,32 @@ parser.add_argument(
                     '-d',
                     metavar='DATAFOLDER',
                     type=str, 
-                    nargs=1,
                     help='Path to datafolder', 
-                    dest='datafolder'
+                    dest='datafolder',
+                    required=True
                    )
 parser.add_argument(
                     '-t',
                     metavar='TYPE',
-                    nargs=1,
                     help='Type of dibe object', 
-                    dest='dibe_type'
+                    dest='dibe_type',
+                    required=True
                    )
 parser.add_argument(
                      '-i',
                      metavar='ID_FIELD',
-                     nargs=1,
                      help='Fieldname of the field containing the identifiers \
                                                          of the dibe-objects',
-                     dest='dibe_id_fieldname'
+                     dest='dibe_id_fieldname',
+                     required=True
                     )  
 args = parser.parse_args()
 
-for shapefile in glob.glob(os.path.join(args.datafolder[0],"*.shp")):
+for shapefile in glob.glob(os.path.join(args.datafolder,"*.shp")):
     layer = Layer(
-                  args.dibe_type[0] , 
+                  args.dibe_type , 
                   os.path.basename(shapefile),
-                  args.dibe_id_fieldname[0],
+                  args.dibe_id_fieldname,
                   shapefile
                  )
     exporter = Exporter(get_output_filename())                                            
