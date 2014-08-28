@@ -172,7 +172,7 @@ class Exporter(object):
 
     def export(self):
         doctree = etree.ElementTree(self.root)
-        output_file = open(self.file_name, 'w')
+        output_file = open(self.file_name, 'wb')
         doctree.write(output_file,
                       encoding="UTF-8",
                       method="xml",
