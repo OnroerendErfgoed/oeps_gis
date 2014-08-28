@@ -31,7 +31,7 @@ def get_output_filename():
         output_filename = os.path.join('d:\\', 
                                        'gebruikersgegevens',
                                         os.path.split(os.path.expanduser('~'))[1],
-                                        'oeps_export',
+                                        'oeps_export'
                                         + (datetime.now().isoformat()).replace(':', '-') 
                                         +'.xml'                                          
                                        )
