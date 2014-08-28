@@ -25,7 +25,7 @@ class OepsLinearRing(LinearRing):
 
     def __init__(self, *args, **kwargs):
         super(OepsLinearRing, self).__init__(*args)
-        self.ring_type = str(kwargs['ring_type']))
+        self.ring_type = str(kwargs['ring_type'])
 
     def xml(self):
         lr_element = etree.Element(u'ring', type=self.ring_type)
@@ -172,7 +172,7 @@ class Exporter(object):
 
     def export(self):
         doctree = etree.ElementTree(self.root)
-        output_file = open(self.file_name, 'w')
+        output_file = open(self.file_name, 'wb')
         doctree.write(output_file,
                       encoding="UTF-8",
                       method="xml",
