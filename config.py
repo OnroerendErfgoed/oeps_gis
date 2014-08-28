@@ -20,17 +20,20 @@ layer_conf.add_layer(Layer('deo_gebeurtenis', 'edit_deo_gebeurtenis.shp', 'Id'))
 layer_conf.add_layer(Layer('bes_bescherming', 'edit_bes_bescherming.shp', 'Id'))
 
 def get_output_filename():
-    return os.path.join(os.path.expanduser('~'), 
+
+    if os.name != 'nt':
+        output_filename = os.path.join(os.path.expanduser('~'), 
                                'oeps_export',
                                'oeps_export_' 
                                + (datetime.now().isoformat()).replace(':', '-') 
                                +'.xml'
                                )
-
-if os.path.splitdrive(get_output_filename())[0]:
-    output_filename = os.path.join('d:\\', 
-                                   'gebruikersgegevens',
-                                   os.path.split(os.path.expanduser('~'))[1],
-                                   'oeps_export',
-                                   os.path.split(output_filename)[1]
-                                  )
+    else:
+        output_filename = os.path.join('d:\\', 
+                                       'gebruikersgegevens',
+                                        os.path.split(os.path.expanduser('~'))[1],
+                                        'oeps_export'
+                                        + (datetime.now().isoformat()).replace(':', '-') 
+                                        +'.xml'                                          
+                                       )
+    return output_filename

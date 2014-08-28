@@ -13,9 +13,9 @@ class OepsPoint(Point):
     def xml(self):
         point_element = etree.Element(u"punt")
         x_element = etree.Element("x")
-        x_element.text = unicode(self.x)
+        x_element.text = str(self.x)
         y_element = etree.Element("y")
-        y_element.text = unicode(self.y)
+        y_element.text = str(self.y)
         point_element.append(x_element)
         point_element.append(y_element)
         return point_element
@@ -25,7 +25,7 @@ class OepsLinearRing(LinearRing):
 
     def __init__(self, *args, **kwargs):
         super(OepsLinearRing, self).__init__(*args)
-        self.ring_type = unicode(kwargs['ring_type'])
+        self.ring_type = str(kwargs['ring_type']))
 
     def xml(self):
         lr_element = etree.Element(u'ring', type=self.ring_type)
@@ -43,7 +43,7 @@ class OepsAdrespunt(object):
     def xml(self):
         adrespunt_element = etree.Element(u'adres')
         id_element = etree.Element(u'id')
-        id_element.text = unicode(self.adres_id)
+        id_element.text = str(self.adres_id)
         adrespunt_element.append(id_element)
         adrespunt_element.append(self.point.xml())
         return adrespunt_element
@@ -69,9 +69,9 @@ class OepsFeature(object):
         self.constituents = constituents
 
     def xml(self):
-        feature_element = etree.Element(unicode(self.feature_type))
+        feature_element = etree.Element(str(self.feature_type))
         id_element = etree.Element(u'id')
-        id_element.text = unicode(self.feature_id)
+        id_element.text = str(self.feature_id)
         feature_element.append(id_element)
         for constituent in self.constituents:
             feature_element.append(constituent.xml())
