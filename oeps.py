@@ -25,7 +25,7 @@ class OepsLinearRing(LinearRing):
 
     def __init__(self, *args, **kwargs):
         super(OepsLinearRing, self).__init__(*args)
-        self.ring_type = str(kwargs['ring_type']))
+        self.ring_type = str(kwargs['ring_type'])
 
     def xml(self):
         lr_element = etree.Element(u'ring', type=self.ring_type)
