@@ -19,7 +19,6 @@ build_exe_options = {
                  "osgeo.gdalnumeric",
                  "shapely.coords",
                  "pkgutil",
-                 "pycompile",
                  "unittest.util"
                  ], 
     "excludes": ["tkinter"],
