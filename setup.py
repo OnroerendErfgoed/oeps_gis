@@ -3,7 +3,26 @@ from cx_Freeze import setup, Executable
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
-    "packages": ["os", "osgeo"], 
+    "packages": ["os", 
+                 "osgeo",
+                 "pdb",
+                 "dummy_threading",
+                 "osgeo.gdal",
+                 "osgeo.ogr",
+                 "osgeo.gdal_array",
+                 "osgeo.gdalconst",
+                 "subprocess",
+                 "osgeo.osr",
+                 "ce",
+                 "shutil",
+                 "tarfile",
+                 "platform",
+                 "osgeo.gdalnumeric",
+                 "shapely.coords
+                 "pkgutil",
+                 "pycompile",
+                 "unittest.util"
+                 ], 
     "excludes": ["tkinter"],
     "include_msvcr": True
     }
