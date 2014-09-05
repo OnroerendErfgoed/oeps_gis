@@ -13,7 +13,6 @@ build_exe_options = {
                  "osgeo.gdalconst",
                  "subprocess",
                  "osgeo.osr",
-                 "ce",
                  "shutil",
                  "tarfile",
                  "platform",
