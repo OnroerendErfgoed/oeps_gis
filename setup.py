@@ -18,7 +18,7 @@ build_exe_options = {
                  "tarfile",
                  "platform",
                  "osgeo.gdalnumeric",
-                 "shapely.coords
+                 "shapely.coords",
                  "pkgutil",
                  "pycompile",
                  "unittest.util"
