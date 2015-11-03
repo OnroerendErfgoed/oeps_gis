@@ -6,8 +6,6 @@ try:
 except ImportError:
     from tkinter import *
 
-import tkMessageBox
-
 from oeps import Exporter
 from config import layer_conf, get_output_filename
          
