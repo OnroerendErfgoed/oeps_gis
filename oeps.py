@@ -63,9 +63,10 @@ class OepsPolygoon(object):
 
 class OepsFeature(object):
 
-    def __init__(self, feature_id, feature_type, constituents):
+    def __init__(self, feature_id, feature_type, basiskaart, constituents):
         self.feature_id = feature_id
         self.feature_type = feature_type
+        self.basiskaart = basiskaart
         self.constituents = constituents
 
     def xml(self):
@@ -73,10 +74,13 @@ class OepsFeature(object):
         id_element = etree.Element(u'id')
         id_element.text = str(self.feature_id)
         feature_element.append(id_element)
+        if self.basiskaart:
+           bsk_element = etree.Element(u'basiskaart')
+           bsk_element.text = str(self.basiskaart)
+           feature_element.append(bsk_element)
         for constituent in self.constituents:
             feature_element.append(constituent.xml())
         return feature_element
-
 
 class GisLocaties(object):
     def __init__(self):
@@ -115,8 +119,9 @@ class Exporter(object):
             feature = lyr.GetNextFeature()
             geometry = feature.GetGeometryRef()
             identifier = feature.GetFieldAsString(layer.id_field)
+            basiskaart = feature.GetFieldAsString(layer.bsk_field)
             oe_point = OepsPoint(geometry.GetX(), geometry.GetY())
-            oe_feature = OepsFeature(identifier, layer.name, [oe_point])
+            oe_feature = OepsFeature(identifier, layer.name, basiskaart, [oe_point])
             self.root.append(oe_feature.xml())
 
     def __append_adres_xml(self, lyr, layer, ds):
@@ -125,6 +130,7 @@ class Exporter(object):
         for i in range(id_lyr.GetFeatureCount()):
             feature = id_lyr.GetNextFeature()
             identifier = feature.GetFieldAsString(layer.id_field)
+            basiskaart = feature.GetFieldAsString(layer.bsk_field)
             sql = 'SELECT * FROM %s WHERE %s = %s' % (layer.basename,
                                                       layer.id_field,
                                                       identifier)
@@ -137,7 +143,7 @@ class Exporter(object):
                           feature.GetFieldAsString(2),
                           OepsPoint(geometry.GetX(), geometry.GetY()))
                 adrespunten.append(adres)
-            oe_feature = OepsFeature(identifier, layer.name, adrespunten)
+            oe_feature = OepsFeature(identifier, layer.name, basiskaart, adrespunten)
             self.root.append(oe_feature.xml())
             ds.ReleaseResultSet(rs)
         ds.ReleaseResultSet(id_lyr)
@@ -154,6 +160,7 @@ class Exporter(object):
             geometry = feature.GetGeometryRef()
             multi_poly = ogr.ForceToMultiPolygon(geometry)
             identifier = feature.GetFieldAsString(layer.id_field)
+            basiskaart = feature.GetFieldAsString(layer.bsk_field)
             polygonen = []
             for j in range(multi_poly.GetGeometryCount()):
                 poly = multi_poly.GetGeometryRef(j)
@@ -164,7 +171,7 @@ class Exporter(object):
                     rings.append(ring_export(ring, ring_type))
                 polygoon = OepsPolygoon(rings)
                 polygonen.append(polygoon)
-            oe_feature = OepsFeature(identifier, layer.name, polygonen)
+            oe_feature = OepsFeature(identifier, layer.name, basiskaart, polygonen)
             self.root.append(oe_feature.xml())
 
     def serialize(self):

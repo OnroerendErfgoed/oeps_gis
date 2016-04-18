@@ -5,6 +5,7 @@ try:
     from Tkinter import *
 except ImportError:
     from tkinter import *
+    from tkinter import messagebox
 
 from oeps import Exporter
 from config import layer_conf, get_output_filename
@@ -73,13 +74,13 @@ class SuccesView:
 
       def __init__(self):
          self.message = 'De lagen werden succesvol geëxporteerd.'
-         tkMessageBox.showinfo('Lagen geëxporteerd', self.message) 
+         messagebox.showinfo('Lagen geëxporteerd', self.message) 
 
 class ErrorView:
 
     def __init__(self, e):
         self.error = e
-        tkMessageBox.showerror('Fout bij het exporteren', e)
+        messagebox.showerror('Fout bij het exporteren', e)
 
 if __name__ == '__main__':
     root = Tk()

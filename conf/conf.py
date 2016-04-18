@@ -4,10 +4,11 @@ import os
 
 class Layer(object):
 
-    def __init__(self, name, filename, id_field, path_override=None):
+    def __init__(self, name, filename, id_field, bsk_field, path_override=None):
         self.name = name
         self.filename = filename
         self.id_field = id_field
+        self.bsk_field = bsk_field
         self._path = None
         self._basename = None
         self.path_override = path_override
